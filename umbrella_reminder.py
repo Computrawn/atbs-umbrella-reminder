@@ -24,13 +24,13 @@ def get_my_weather():
     site_status = res.status_code
 
     if site_status == 200:
-        now_selector = "div.row-odd:nth-child(1) > div:nth-child(2)"
+        now_selector = ".myforecast-current"
         forecast_today = res.html.find(now_selector, first=True).text
-        tomorrow_selector = "div.row:nth-child(3) > div:nth-child(2)"
-        forecast_tomorrow = res.html.find(tomorrow_selector, first=True).text
-        return forecast_today, forecast_tomorrow
+        detail_selector = "div.row-odd:nth-child(1) > div:nth-child(2)"
+        first_detailed = res.html.find(detail_selector, first=True).text
+        return forecast_today, first_detailed
 
 
-current_forecast, nextday_forecast = get_my_weather()
-logging.info(current_forecast)
-logging.info(nextday_forecast)
+current_forecast, more_details = get_my_weather()
+combined_info = f"Now: {current_forecast} | Details: {more_details}"
+logging.info(combined_info)
