@@ -3,3 +3,6 @@ Chapter 12 showed you how to use the requests module to scrape data
 from https://weather.gov/. Write a program that runs just before you wake up in the 
 morning and checks whether it’s raining that day. If so, have the program text you a 
 reminder to pack an umbrella before leaving the house.
+
+Changed functionality:
+* I don't have a phone number to send texts from, so I just turned this into an email messenger.
