@@ -23,6 +23,7 @@ EMAIL_PASS = os.environ.get("ICLD_PASS")  # Get email password from env vars
 
 
 def get_my_weather():
+    """Scrape current weather forecast from site."""
     session = HTMLSession()
     res = session.get(MY_WEATHER, timeout=10)
     res.raise_for_status()
@@ -33,33 +34,43 @@ def get_my_weather():
         forecast_today = res.html.find(now_selector, first=True).text
         detail_selector = "div.row-odd:nth-child(1) > div:nth-child(2)"
         first_detailed = res.html.find(detail_selector, first=True).text
-        return forecast_today, first_detailed
     print(f"Something went wrong: Error {site_status}")
+    return forecast_today, first_detailed
 
 
-def send_forecast_email():
+def check_for_rain():
+    """Checks for rain keywords in forecast."""
     current_forecast, current_details = get_my_weather()
     rain_chance = ["shower", "thunderstorm", "rain", "sprinkle"]
 
     for weather_condition in rain_chance:
         if weather_condition in current_details:
-            weather_message = EmailMessage()
-            weather_message["Subject"] = f"Right now in Decatur: {current_forecast}"
-            weather_message["From"] = EMAIL_USER
-            weather_message["To"] = EMAIL_USER
-            weather_message.set_content(
-                f"You might want to pack an umbrella: {current_details}"
-            )
-
-            combined_info = f"Now: {current_forecast} | Details: {current_details}"
-            logging.info(combined_info)
-
-            with SMTP(EMAIL_SMTP, 587) as server:
-                server.ehlo()
-                server.starttls()
-                server.ehlo()
-                server.login(EMAIL_USER, EMAIL_PASS)
-                server.send_message(weather_message)
+            return True, current_forecast, current_details
 
 
-send_forecast_email()
+def send_email(subject, content):
+    """Send umbrella reminder email."""
+    weather_message = EmailMessage()
+    weather_message["Subject"] = f"Right now in Decatur: {subject}"
+    weather_message["From"] = EMAIL_USER
+    weather_message["To"] = EMAIL_USER
+    weather_message.set_content(
+        f"""You might want to pack an umbrella.
+        
+Forecast details: {content}"""
+    )
+
+    combined_info = f"Now: {subject} | Details: {content}"
+    logging.info(combined_info)
+
+    with SMTP(EMAIL_SMTP, 587) as server:
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(EMAIL_USER, EMAIL_PASS)
+        server.send_message(weather_message)
+
+
+is_raining, subject_info, content_details = check_for_rain()
+if is_raining:
+    send_email(subject_info, content_details)
