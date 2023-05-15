@@ -34,7 +34,8 @@ def get_my_weather():
         forecast_today = res.html.find(now_selector, first=True).text
         detail_selector = "div.row-odd:nth-child(1) > div:nth-child(2)"
         first_detailed = res.html.find(detail_selector, first=True).text
-    print(f"Something went wrong: Error {site_status}")
+    else:
+        print(f"Something went wrong: Error {site_status}")
     return forecast_today, first_detailed
 
 
@@ -45,7 +46,8 @@ def check_for_rain():
 
     for weather_condition in rain_chance:
         if weather_condition in current_details:
-            return True, current_forecast, current_details
+            it_is_raining = True
+    return it_is_raining, current_forecast, current_details
 
 
 def send_email(subject, content):
@@ -55,7 +57,7 @@ def send_email(subject, content):
     weather_message["From"] = EMAIL_USER
     weather_message["To"] = EMAIL_USER
     weather_message.set_content(
-        f"""You might want to pack an umbrella.
+        f"""You might want to pack an umbrella before heading out the door.
         
 Forecast details: {content}"""
     )
