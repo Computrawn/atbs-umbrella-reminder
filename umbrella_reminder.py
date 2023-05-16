@@ -43,7 +43,7 @@ def check_for_rain():
     """Checks for rain keywords in forecast."""
     current_forecast, current_details = get_my_weather()
     rain_chance = ["shower", "thunderstorm", "rain", "sprinkle"]
-
+    it_is_raining = False
     for weather_condition in rain_chance:
         if weather_condition in current_details:
             it_is_raining = True
