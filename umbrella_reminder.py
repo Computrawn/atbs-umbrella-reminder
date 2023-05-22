@@ -15,17 +15,18 @@ logging.basicConfig(
 )
 logging.disable(logging.DEBUG)  # Note out to enable logging.
 
-USER_ZIP = os.environ.get("USER_ZIP")  # Get site address from environment variables
 EMAIL_SMTP = os.environ.get("SENDER_SMTP")  # Get smtp address from env vars
 EMAIL_USER = os.environ.get("SENDER_USER")  # Get email address from env vars
 EMAIL_PASS = os.environ.get("SENDER_PASS")  # Get email password from env vars
-USER_WEATHER = f"https://www.weather.gov/{USER_ZIP}"
 
 
 def get_my_weather():
     """Scrape current weather forecast and location information from site."""
+    user_zip = os.environ.get("USER_ZIP")  # Get user zipcode from env vars
+    user_weather = f"https://www.weather.gov/{user_zip}"
+
     session = HTMLSession()
-    res = session.get(USER_WEATHER, timeout=10)
+    res = session.get(user_weather, timeout=10)
     res.raise_for_status()
     site_status = res.status_code
 
