@@ -34,27 +34,29 @@ def get_my_weather():
         forecast_today = res.html.find(now_selector, first=True).text
         detail_selector = "div.row-odd:nth-child(1) > div:nth-child(2)"
         first_detailed = res.html.find(detail_selector, first=True).text
+        location_selector = "#seven-day-forecast > div.panel-heading > h2"
+        zipcode_location = res.html.find(location_selector, first=True).text
     else:
         print(f"Something went wrong: Error {site_status}")
-    logging.info("%s: %s", (forecast_today), (first_detailed))
-    return forecast_today, first_detailed
+    logging.info("%s — %s: %s", zipcode_location, (forecast_today), (first_detailed))
+    return forecast_today, first_detailed, zipcode_location
 
 
 def check_for_rain():
     """Checks for rain keywords in forecast."""
-    current_forecast, current_details = get_my_weather()
+    current_forecast, current_details, zip_location = get_my_weather()
     rain_chance = ["shower", "thunderstorm", "rain", "sprinkle"]
     it_is_raining = False
     for weather_condition in rain_chance:
         if weather_condition in current_details:
             it_is_raining = True
-    return it_is_raining, current_forecast, current_details
+    return it_is_raining, current_forecast, current_details, zip_location
 
 
-def send_email(subject, content):
+def send_email(subject, content, location):
     """Send umbrella reminder email."""
     weather_message = EmailMessage()
-    weather_message["Subject"] = f"Right now in Decatur: {subject}"
+    weather_message["Subject"] = f"Right now in {location}: {subject}"
     weather_message["From"] = EMAIL_USER
     weather_message["To"] = EMAIL_USER
     weather_message.set_content(
@@ -74,6 +76,6 @@ Forecast details: {content}"""
         server.send_message(weather_message)
 
 
-is_raining, subject_info, content_details = check_for_rain()
+is_raining, subject_info, content_details, zip_location = check_for_rain()
 if is_raining:
-    send_email(subject_info, content_details)
+    send_email(subject_info, content_details, zip_location)
