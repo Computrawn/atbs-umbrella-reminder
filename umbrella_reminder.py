@@ -15,15 +15,15 @@ logging.basicConfig(
 )
 logging.disable(logging.DEBUG)  # Note out to enable logging.
 
-
-MY_WEATHER = os.environ.get("MY_WEATHER")  # Get site address from environment variables
+USER_ZIP = os.environ.get("USER_ZIP")  # Get site address from environment variables
 EMAIL_SMTP = os.environ.get("ICLD_SMTP")  # Get smtp address from env vars
 EMAIL_USER = os.environ.get("ICLD_USER")  # Get email address from env vars
 EMAIL_PASS = os.environ.get("ICLD_PASS")  # Get email password from env vars
+MY_WEATHER = f"https://www.weather.gov/{USER_ZIP}"
 
 
 def get_my_weather():
-    """Scrape current weather forecast from site."""
+    """Scrape current weather forecast and location information from site."""
     session = HTMLSession()
     res = session.get(MY_WEATHER, timeout=10)
     res.raise_for_status()
@@ -38,19 +38,19 @@ def get_my_weather():
         zipcode_location = res.html.find(location_selector, first=True).text
     else:
         print(f"Something went wrong: Error {site_status}")
-    logging.info("%s — %s: %s", zipcode_location, (forecast_today), (first_detailed))
+    logging.info("%s — %s: %s", zipcode_location, forecast_today, first_detailed)
     return forecast_today, first_detailed, zipcode_location
 
 
 def check_for_rain():
     """Checks for rain keywords in forecast."""
-    current_forecast, current_details, zip_location = get_my_weather()
+    current_forecast, current_details, zipcode_location = get_my_weather()
     rain_chance = ["shower", "thunderstorm", "rain", "sprinkle"]
     it_is_raining = False
     for weather_condition in rain_chance:
         if weather_condition in current_details:
             it_is_raining = True
-    return it_is_raining, current_forecast, current_details, zip_location
+    return it_is_raining, current_forecast, current_details, zipcode_location
 
 
 def send_email(subject, content, location):
@@ -65,8 +65,8 @@ def send_email(subject, content, location):
 Forecast details: {content}"""
     )
 
-    combined_info = f"Now: {subject} | Details: {content}"
-    logging.info(combined_info)
+    # combined_info = f"Now in {location}: {subject} | Details: {content}"
+    # logging.info(combined_info)
 
     with SMTP(EMAIL_SMTP, 587) as server:
         server.ehlo()
@@ -76,6 +76,6 @@ Forecast details: {content}"""
         server.send_message(weather_message)
 
 
-is_raining, subject_info, content_details, zip_location = check_for_rain()
+is_raining, subject_info, content_details, user_location = check_for_rain()
 if is_raining:
-    send_email(subject_info, content_details, zip_location)
+    send_email(subject_info, content_details, user_location)
