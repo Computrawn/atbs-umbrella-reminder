@@ -66,9 +66,6 @@ def send_email(subject, content, location):
 Forecast details: {content}"""
     )
 
-    # combined_info = f"Now in {location}: {subject} | Details: {content}"
-    # logging.info(combined_info)
-
     with SMTP(EMAIL_SMTP, 587) as server:
         server.ehlo()
         server.starttls()
