@@ -36,6 +36,7 @@ def get_my_weather():
         first_detailed = res.html.find(detail_selector, first=True).text
     else:
         print(f"Something went wrong: Error {site_status}")
+    logging.info("%s: %s", (forecast_today), (first_detailed))
     return forecast_today, first_detailed
 
 
