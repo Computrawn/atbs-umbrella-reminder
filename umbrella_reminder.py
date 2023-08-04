@@ -20,6 +20,13 @@ EMAIL_USER = os.environ.get("SENDER_USER")  # Get email address from env vars
 EMAIL_PASS = os.environ.get("SENDER_PASS")  # Get email password from env vars
 
 
+def main():
+    """Execute umbrella reminder script."""
+    is_raining, subject_info, content_details, user_location = check_for_rain()
+    if is_raining:
+        send_email(subject_info, content_details, user_location)
+
+
 def get_my_weather():
     """Scrape current weather forecast and location information from site."""
     user_zip = os.environ.get("USER_ZIP")  # Get user zipcode from env vars
@@ -74,6 +81,5 @@ Forecast details: {content}"""
         server.send_message(weather_message)
 
 
-is_raining, subject_info, content_details, user_location = check_for_rain()
-if is_raining:
-    send_email(subject_info, content_details, user_location)
+if __name__ == "__main__":
+    main()
